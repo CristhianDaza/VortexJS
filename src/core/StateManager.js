@@ -54,8 +54,15 @@ export const unsubscribe = (prop, callback, isLocal = false) => {
 const _notify = (prop, isLocal = false) => {
   const target = isLocal ? subscribersLocalState : subscribers;
   if (target.has(prop)) {
-    target.get(prop).forEach(callback => {
-      if (typeof callback === 'function') callback();
+    const listeners = target.get(prop);
+    
+    if (listeners.length === 0) return;
+    
+    listeners.forEach(callback => {
+      if (typeof callback === 'function') {
+        callback();
+      }
     });
   }
 }
+
