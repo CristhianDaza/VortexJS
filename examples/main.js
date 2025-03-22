@@ -1,59 +1,50 @@
-import {
-  createLocalState,
-  createState,
-  subscribe,
-  unsubscribe,
-} from '../src/'
+import { VortexJs } from '../src';
 
-// TEST 1: Global State
-console.log("=== Test 1: Global State ===");
-
-subscribe('name', () => {
-  console.log(`The name is ${createState.name}`);
-});
-
-createState.name = 'VortexJS';
-createState.name = 'VortexJS Final Subscribe';
-
-// TEST 2: Local State
-console.log("=== Test 2: Local State ===");
-
-const myComponent = {};
-const componentState = createLocalState(myComponent);
-
-subscribe('appName', () => {
-  console.log(`The app name is ${componentState.appName}`);
-}, true);
-
-componentState.appName = 'VortexJS';
-componentState.appName = 'VortexJS Final Subscribe';
-
-// TEST 3: Unsubscribe
-console.log("=== Test 3: Unsubscribe ===");
-
-const changeName = () => {
-  console.log('The name has changed');
+class App extends VortexJs {
+  constructor() {
+    super({});
+    this.setState({ theme: 'dark', pageName: 'Home' });
+  }
+  
+  addEvent() {
+    document.querySelector('#toggleTheme').addEventListener('click', () => {
+      this.setState({
+        theme: this.getState('theme') === 'dark' ? 'light' : 'dark'
+      });
+    });
+    
+    document.querySelector('#nameApp').addEventListener('click', () => {
+      this.setState({
+        pageName: this.getState('pageName') === 'Home' ? 'VortexJS' : 'Home'
+      });
+    });
+  }
+  
+  render() {
+    const theme = this.getState('theme');
+    const pageName = this.getState('pageName');
+    const style = `
+      padding: 20px;
+      background-color: ${theme === 'dark' ? '#333' : '#FFF'};
+      color: ${theme === 'dark' ? '#FFF' : '#000'};
+    `;
+    return `
+       <div style="${style}">
+        <h1>Welcome to ${pageName}</h1>
+        <p>Theme: ${theme}</p>
+        <button id="toggleTheme">Toggle Theme</button>
+        <button id="nameApp">Show name App</button>
+      </div>
+    `;
+  }
 }
 
-subscribe('otherName', changeName);
-createState.otherName = 'VortexJS';
+const app = new App();
+const VortexJS = document.querySelector('#app');;
+app.mount(VortexJS);
 
-unsubscribe('otherName', changeName);
-createState.otherName = 'VortexJS Final';
-
-// TEST 4: Multiple Local State
-console.log("=== Test 4: Multiple Local State ===");
-
-const myOtherComponent = {};
-const otherComponentState = createLocalState(myOtherComponent);
-
-subscribe('theme', () => {
-  console.log(`The theme is ${otherComponentState.theme}`);
-}, true);
-
-subscribe('user', () => {
-  console.log(`The user is ${otherComponentState.user}`);
-}, true);
-
-otherComponentState.theme = 'dark';
-otherComponentState.user = 'admin';
+// dismount
+const time = 10000000;
+setTimeout(() => {
+  app.unmount();
+}, time);
