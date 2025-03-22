@@ -8,6 +8,7 @@ export class VortexJs {
   constructor(component) {
     this.component = component;
     this.#state = createLocalState(this.component);
+    this.updateCallback = this.update.bind(this);
   }
   
   mount(container) {
@@ -27,25 +28,25 @@ export class VortexJs {
     }
   }
   
-  on(prop, callback, isLocal = false) {
+  on(prop, isLocal = false) {
     if (!this.#subscriptions.has(prop)) {
       this.#subscriptions.set(prop, []);
     }
     const callbacks = this.#subscriptions.get(prop);
-    if (!callbacks.includes(callback)) {
-      callbacks.push(callback);
-      subscribe(prop, callback, isLocal);
+    if (!callbacks.includes(this.updateCallback)) {
+      callbacks.push(this.updateCallback);
+      subscribe(prop, this.updateCallback, isLocal);
     }
   }
 
-  
-  off(prop, callback, isLocal = false) {
+  off(prop, isLocal = false) {
     if (this.#subscriptions.has(prop)) {
       const callbacks = this.#subscriptions.get(prop);
-      const index = callbacks.indexOf(callback);
+      const index = callbacks.indexOf(this.updateCallback);
       if (index !== -1) {
+        console.log('off', index, prop, isLocal);
         callbacks.splice(index, 1);
-        unsubscribe(prop, callback, isLocal);
+        unsubscribe(prop, this.updateCallback, isLocal);
       }
     }
   }
@@ -53,19 +54,23 @@ export class VortexJs {
   getElement(selector) {
     return this.#container ? this.#container.querySelector(selector) : null;
   }
+
+  setGlobalState(newState) {
+    for (const key in newState) {
+      createState[key] = newState[key];
+      if (!this.#subscriptions.has(key)) {
+        this.on(key, false);
+      }
+    }
+  }
   
   setState(newState) {
     for (const key in newState) {
       this.#state[key] = newState[key];
+      if (!this.#subscriptions.has(key)) {
+        this.on(key, true);
+      }
     }
-    this.update();
-  }
-  
-  setGlobalState(newState) {
-    for (const key in newState) {
-      createState[key] = newState[key];
-    }
-    this.update();
   }
   
   getState(key) {
