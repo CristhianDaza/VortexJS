@@ -1,6 +1,6 @@
 import { subscribe, unsubscribe, createLocalState, createState } from './StateManager.js';
 
-export class VortexJs {
+export class ReactiveComponent {
   #state = null;
   #subscriptions = new Map();
   #container = null;
@@ -44,7 +44,6 @@ export class VortexJs {
       const callbacks = this.#subscriptions.get(prop);
       const index = callbacks.indexOf(this.updateCallback);
       if (index !== -1) {
-        console.log('off', index, prop, isLocal);
         callbacks.splice(index, 1);
         unsubscribe(prop, this.updateCallback, isLocal);
       }
