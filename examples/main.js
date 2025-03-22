@@ -4,12 +4,15 @@ class App extends VortexJs {
   constructor() {
     super({});
     this.setState({ theme: 'dark', pageName: 'Home' });
-    this.setGlobalState({ nameApp: 'VortexJS', theme: 'light' });
+    this.setGlobalState({ nameApp: 'VortexJS', theme: 'light', counter: 0, isListening: true });
+    this.on('counter')
   }
   
   addEvent() {
     const toggleButton = this.getElement('#toggleTheme');
     const nameAppButton = this.getElement('#nameAppButton');
+    const incrementButton = this.getElement('#incrementCounter');
+    const toggleCounter = this.getElement('#toggleCounter');
     
     if (toggleButton) {
       toggleButton.addEventListener('click', () => {
@@ -26,24 +29,44 @@ class App extends VortexJs {
         });
       });
     }
+    
+    if (incrementButton) {
+      incrementButton.addEventListener('click', () => {
+        const currentCount = this.getGlobalState('counter');
+        this.setGlobalState({ counter: currentCount + 1 });
+      });
+    }
+    
+    if (toggleCounter) {
+      toggleCounter.addEventListener('click', () => {
+        const isListening = this.getGlobalState('isListening');
+        console.log('isListening', isListening);
+        if (isListening) {
+          this.off('counter');
+          this.setGlobalState({ isListening: false });
+        } else {
+          this.on('counter');
+          this.setGlobalState({ isListening: true });
+        }
+      });
+    }
   }
   
   componentDidMount() {
-    console.log('states: ', this.getStates());
-    console.log('Global states: ', this.getGlobalStates());
+    const isListening = this.getGlobalState('isListening');
+    console.log('isListening', isListening);
   }
   
-  componentDidUpdate() {
-    console.log('Component did update');
-  }
+  componentDidUpdate() {}
   
-  componentWillUnmount() {
-    console.log('Component will unmount');
-  }
+  componentWillUnmount() {}
   
   render() {
     const theme = this.getState('theme');
     const nameApp = this.getGlobalState('nameApp');
+    const counter = this.getGlobalState('counter');
+    const isListening = this.getGlobalState('isListening');
+    
     const style = `
       padding: 20px;
       background-color: ${theme === 'dark' ? '#333' : '#FFF'};
@@ -53,8 +76,13 @@ class App extends VortexJs {
        <div style="${style}">
         <h1>Welcome to ${nameApp}</h1>
         <p>Theme: ${theme}</p>
+        <p>Global Counter: ${counter}</p>
         <button id="toggleTheme">Toggle Theme</button>
         <button id="nameAppButton">Show name App</button>
+        <button id="incrementCounter">Increment Counter</button>
+        <button id="toggleCounter" data-listening=${isListening}>
+          ${isListening ? 'Start Listening Counter' : 'Stop Listening Counter'}
+        </button>
       </div>
     `;
   }
