@@ -3,7 +3,7 @@ import {
   createState,
   subscribe,
   unsubscribe,
-} from '../src/core/StateManager.js'
+} from '../src/'
 
 // TEST 1: Global State
 console.log("=== Test 1: Global State ===");
