@@ -8,17 +8,24 @@ class App extends VortexJs {
   }
   
   addEvent() {
-    document.querySelector('#toggleTheme').addEventListener('click', () => {
-      this.setState({
-        theme: this.getState('theme') === 'dark' ? 'light' : 'dark'
-      });
-    });
+    const toggleButton = this.getElement('#toggleTheme');
+    const nameAppButton = this.getElement('#nameAppButton');
     
-    document.querySelector('#nameAppButton').addEventListener('click', () => {
-      this.setGlobalState({
-        nameApp: this.getGlobalState('nameApp') === 'Home' ? 'VortexJS' : 'Home'
+    if (toggleButton) {
+      toggleButton.addEventListener('click', () => {
+        this.setState({
+          theme: this.getState('theme') === 'dark' ? 'light' : 'dark'
+        });
       });
-    });
+    }
+    
+    if (nameAppButton) {
+      nameAppButton.addEventListener('click', () => {
+        this.setGlobalState({
+          nameApp: this.getGlobalState('nameApp') === 'Home' ? 'VortexJS' : 'Home'
+        });
+      });
+    }
   }
   
   componentDidMount() {

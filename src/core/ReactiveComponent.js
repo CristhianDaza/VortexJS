@@ -27,27 +27,31 @@ export class VortexJs {
     }
   }
   
-  on(prop, callback) {
+  on(prop, callback, isLocal = false) {
     if (!this.#subscriptions.has(prop)) {
       this.#subscriptions.set(prop, []);
     }
     const callbacks = this.#subscriptions.get(prop);
     if (!callbacks.includes(callback)) {
       callbacks.push(callback);
-      subscribe(prop, callback, true);
+      subscribe(prop, callback, isLocal);
     }
   }
 
   
-  off(prop, callback) {
+  off(prop, callback, isLocal = false) {
     if (this.#subscriptions.has(prop)) {
       const callbacks = this.#subscriptions.get(prop);
       const index = callbacks.indexOf(callback);
       if (index !== -1) {
         callbacks.splice(index, 1);
-        unsubscribe(prop, callback, true);
+        unsubscribe(prop, callback, isLocal);
       }
     }
+  }
+  
+  getElement(selector) {
+    return this.#container ? this.#container.querySelector(selector) : null;
   }
   
   setState(newState) {
