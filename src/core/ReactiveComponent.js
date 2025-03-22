@@ -1,4 +1,4 @@
-import { subscribe, unsubscribe, createLocalState } from './StateManager.js';
+import { subscribe, unsubscribe, createLocalState, createState } from './StateManager.js';
 
 export class VortexJs {
   #state = null;
@@ -12,17 +12,20 @@ export class VortexJs {
   
   mount(container) {
     this.#container = container;
+    this.componentDidMount();
     this.update();
   }
   
   update() {
     if (this.#container) {
+      if (this.#container.innerHTML === this.render()) {
+        return;
+      }
       this.#container.innerHTML = this.render();
       this.addEvent();
+      this.componentDidUpdate();
     }
   }
-  
-  addEvent() {}
   
   on(prop, callback) {
     if (!this.#subscriptions.has(prop)) {
@@ -54,8 +57,27 @@ export class VortexJs {
     this.update();
   }
   
+  setGlobalState(newState) {
+    for (const key in newState) {
+      createState[key] = newState[key];
+    }
+    this.update();
+  }
+  
   getState(key) {
     return this.#state[key];
+  }
+  
+  getStates() {
+    return this.#state;
+  }
+  
+  getGlobalState(key) {
+    return createState[key];
+  }
+  
+  getGlobalStates() {
+    return { ...createState };
   }
   
   render() {
@@ -63,10 +85,16 @@ export class VortexJs {
   }
   
   unmount() {
+    this.componentWillUnmount();
     this.#container.innerHTML = '';
     this.#subscriptions.forEach((callbacks, prop) => {
       callbacks.forEach(callback => unsubscribe(prop, callback, true));
     });
     this.#subscriptions.clear();
   }
+  
+  addEvent() {}
+  componentDidMount() {}
+  componentDidUpdate() {}
+  componentWillUnmount() {}
 }
